@@ -1,20 +1,20 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from .models import Post
 
 posts = [
 	{'title' : 'Title1',
-	'postedby' : 'User1',
-	'date' : 'Date1',
-	'context' : 'Context1'},
+	'author' : 'User1',
+	'date_posted' : 'Date1',
+	'content' : 'Context1'},
 	{'title' : 'Title2',
-	'postedby' : 'User2',
-	'date' : 'Date2',
-	'context' : 'Context2'}
+	'author' : 'User2',
+	'date_posted' : 'Date2',
+	'content' : 'Context2'}
 ]
 
 def home(request):
 	content = {
-		'posts' : posts
+		'posts' : Post.objects.all()
 	}
 	return render(request, 'healthpoint/home.html', content)
 
