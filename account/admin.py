@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, Doctor
 
 class UserAdminConfig(UserAdmin):
 	search_fields = ('user_name', 'email', 'full_name')
-	list_filter = ('user_name', 'full_name', 'email', 'is_active', 'is_staff', 'is_doctor')
-	ordering = ('date_joined',)
+	list_filter = ('is_active', 'is_staff', 'is_doctor')
+	ordering = ('-date_joined',)
 	list_display = ('email', 'user_name', 'full_name', 'is_active', 'is_staff', 'is_doctor')
 	fieldsets = (
 		(None, {'fields': ('email', 'user_name', 'full_name',)}),
@@ -18,5 +18,10 @@ class UserAdminConfig(UserAdmin):
 			),
 		)
 
+class DoctorAdmin(admin.ModelAdmin):
+	search_fields = ('user__user_name', 'specialization' ,'college_attended', 'current_affiliation')
+	list_display = ('user', 'specialization' ,'college_attended', 'current_affiliation')
+
 
 admin.site.register(User, UserAdminConfig)
+admin.site.register(Doctor, DoctorAdmin)

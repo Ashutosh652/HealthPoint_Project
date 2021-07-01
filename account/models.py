@@ -54,3 +54,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 	def has_module_perms(self, app_label):
 		return self.is_superuser
 #....................CUSTOM USER MODEL...........................
+
+class Doctor(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+	college_attended = models.CharField(max_length=200)
+	college_address = models.CharField(max_length=200)
+	date_graduated = models.DateField(null=True, blank=True)
+	current_affiliation = models.CharField(max_length=200)
+	specialization = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.user.user_name
