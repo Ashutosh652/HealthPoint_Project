@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from .forms import UserRegisterForm, DoctorRegisterForm
 from django.views.generic import CreateView
 from .models import User, Doctor
@@ -18,7 +19,35 @@ from .models import User, Doctor
 # 	return render(request, 'account/register.html', {'form': form})
 
 def register(request):
-	return render(request, 'account/register.html')
+	if request.user.is_authenticated:
+		return redirect('healthpoint-home')
+	else:
+		return render(request, 'account/register.html')
+
+
+def loginpage(request):
+	if request.user.is_authenticated:
+		return redirect('healthpoint-home')
+	else:
+		if request.method == 'POST':
+			email = request.POST.get('email')
+			password = request.POST.get('password')
+			user = authenticate(request, username=email, password=password)
+			if user is not None and user.is_active:
+				login(request ,user)
+				return redirect('healthpoint-home')
+			elif user is None:
+				messages.error(request, 'The email or password is wrong!')
+				return redirect('login')
+			else:
+				messages.error(request, 'Your account is currently inactive!')
+				return redirect('login')
+		return render(request, 'account/login.html')
+
+
+def logoutpage(request):
+	logout(request)
+	return render(request, 'account/logout.html')
 
 
 class UserRegister(CreateView):
