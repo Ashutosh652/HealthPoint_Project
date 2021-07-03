@@ -47,3 +47,13 @@ class DoctorRegisterForm(UserCreationForm):
 		doctor.specialization = self.cleaned_data.get('specialization')
 		doctor.save()
 		return user
+
+class UserUpdateForm(forms.ModelForm):
+	email = forms.EmailField(label='Email')
+	full_name = forms.CharField(label='Full Name' ,max_length = 100)
+	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}))
+	profile_pic = forms.ImageField()
+
+	class Meta:
+		model = User
+		fields = ['full_name', 'user_name', 'email', 'date_of_birth', 'profile_pic']

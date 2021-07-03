@@ -1,4 +1,5 @@
 {% extends "healthpoint/base.html" %}
+{% load crispy_forms_tags %}
 {% block content %}
     <div class="content-section">
       <div class="media">
@@ -6,8 +7,8 @@
         <div class="media-body">
           <h2 class="account-heading">{{ user.user_name }}</h2>
           <p class="text-secondary">{{ user.email }}</p>
+          <div class="border-top pt-3"><small class="text-muted"><a class="ml-2 btn" href="{% url 'user_updateprofile' %}">Update Info</a></small></div>
         </div>
       </div>
-      <!-- FORM HERE -->
     </div>
 {% endblock content %}

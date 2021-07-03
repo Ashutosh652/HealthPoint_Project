@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from PIL import Image
 
 #....................CUSTOM USER MODEL...........................
 class AccountManager(BaseUserManager):
@@ -55,6 +56,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 	def has_module_perms(self, app_label):
 		return self.is_superuser
+
+	def save(self):
+		super().save()
+		img = Image.open(self.profile_pic.path)
+		if img.height>300 or img.width>300:
+			output_size = (300, 300)
+			img.thumbnail(output_size)
+			img.save(self.profile_pic.path)
 #....................CUSTOM USER MODEL...........................
 
 class Doctor(models.Model):

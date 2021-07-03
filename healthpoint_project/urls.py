@@ -28,6 +28,7 @@ urlpatterns = [
     path('profile/', account_views.profile, name='profile'),
     path('login/', account_views.loginpage, name='login'),
     path('logout/', account_views.logoutpage, name='logout'),
+    path('user_updateprofile/', account_views.user_updateprofile, name='user_updateprofile'),
     path('', include('healthpoint.urls')),
 ]
 
