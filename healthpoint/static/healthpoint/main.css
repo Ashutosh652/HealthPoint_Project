@@ -82,3 +82,17 @@ a.article-title:hover {
 .account-heading {
   font-size: 2.5rem;
 }
+
+.remove-default-btn {
+  background-color: #transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.edit-color {
+  color: #333;
+}
+
+.delete-color {
+  color: #ff0000;
+}

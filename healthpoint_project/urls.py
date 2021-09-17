@@ -22,15 +22,9 @@ from account import views as account_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', account_views.register, name='register'),
-    path('user_register/', account_views.UserRegister.as_view(), name='user_register'),
-    path('doctor_register/', account_views.DoctorRegister.as_view(), name='doctor_register'),
-    path('profile/', account_views.profile, name='profile'),
-    path('login/', account_views.loginpage, name='login'),
-    path('logout/', account_views.logoutpage, name='logout'),
-    path('user_updateprofile/', account_views.user_updateprofile, name='user_updateprofile'),
     path('', include('healthpoint.urls')),
-]
+    path('account/', include('account.urls')),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

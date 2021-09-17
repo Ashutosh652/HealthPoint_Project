@@ -7,7 +7,7 @@ from django.db import transaction
 class UserRegisterForm(UserCreationForm):
 	email = forms.EmailField(label='Email')
 	full_name = forms.CharField(label='Full Name' ,max_length = 100)
-	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}))
+	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
 
 	class Meta:
 		model = User
@@ -17,7 +17,7 @@ class UserRegisterForm(UserCreationForm):
 class DoctorRegisterForm(UserCreationForm):
 	email = forms.EmailField(label='Email')
 	full_name = forms.CharField(label='Full Name' ,max_length = 100)
-	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}))
+	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
 	college_attended = forms.CharField(label='College Graduated From' ,max_length=200)
 	college_address = forms.CharField(label='Address of College' ,max_length=200)
 	date_graduated = forms.DateField(label='Date Graduated', widget=forms.widgets.DateInput(attrs={'type': 'date'}))
@@ -49,11 +49,36 @@ class DoctorRegisterForm(UserCreationForm):
 		return user
 
 class UserUpdateForm(forms.ModelForm):
-	email = forms.EmailField(label='Email')
-	full_name = forms.CharField(label='Full Name' ,max_length = 100)
-	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}))
-	profile_pic = forms.ImageField()
+	email = forms.EmailField(label='Email', required=False)
+	full_name = forms.CharField(label='Full Name', max_length = 100, required=False)
+	user_name = forms.CharField(max_length=20, required=False)
 
 	class Meta:
 		model = User
-		fields = ['full_name', 'user_name', 'email', 'date_of_birth', 'profile_pic']
+		fields = ['full_name', 'user_name', 'email']
+
+
+class UserProfileUpdateForm(forms.ModelForm):
+	address = forms.CharField(label='Address', max_length = 300, required = False)
+	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
+	profile_pic = forms.ImageField(required=False)
+
+	class Meta:
+		model = User
+		fields = ['date_of_birth', 'profile_pic', 'address']
+
+
+class DoctorUpdateForm(forms.ModelForm):
+	address = forms.CharField(label='Address', max_length = 300, required = False)
+	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
+	profile_pic = forms.ImageField(required=False)
+	college_attended = forms.CharField(label='College Attended' ,max_length = 200, required=False)
+	college_address = forms.CharField(label='College Location' ,max_length = 200, required=False)
+	date_graduated = forms.DateField(label='Date Graduated', required=False)
+	certificate_of_graduation = forms.ImageField(label='Certificate of Graduation', required=False)
+	current_affiliation = forms.CharField(label='Current Workplace' ,max_length = 200, required=False)
+	specialization = forms.CharField(label='Specialization' ,max_length = 100, required=False)
+
+	class Meta:
+		model = Doctor
+		fields = ['address','date_of_birth', 'profile_pic', 'college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation', 'current_affiliation', 'specialization']

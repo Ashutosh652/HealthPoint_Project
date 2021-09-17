@@ -7,6 +7,8 @@ class Post(models.Model):
 	content = models.TextField()
 	date_posted = models.DateTimeField(default=timezone.now)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	likes = models.ManyToManyField(User, blank=True, related_name='likes')
+	dislikes = models.ManyToManyField(User, blank=True, related_name='dislikes')
 
 	class Meta:
 		ordering = ['-date_posted']
@@ -19,6 +21,19 @@ class Comment(models.Model):
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	content = models.TextField()
 	date_commented = models.DateTimeField(default=timezone.now)
+	likes = models.ManyToManyField(User, blank=True, related_name='comment_likes')
+	dislikes = models.ManyToManyField(User, blank=True, related_name='comment_dislikes')
+	parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name='+')
+
+	@property
+	def children(self):
+		return Comment.objects.filter(parent=self).order_by('-date_commented').all()
+
+	@property
+	def is_parent(self):
+		if self.parent is None:
+			return True
+		return False
 
 	class Meta:
 		ordering = ['-date_commented']

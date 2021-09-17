@@ -1,0 +1,47 @@
+{% extends "healthpoint/base.html" %}
+
+{% block content %}
+{% for profile in profile_list %}
+        <div class="row justify-content-left mt-3">
+            <div class="col-md-5 col-sm-12 border-bottom position-relative">
+            <img class='rounded-circle article-img' src="{{ profile.profile_pic.url }}">
+                <p>
+                    <a class="mr-2" href="{% url 'user_profile' profile.pk %}">
+                        {% if profile.user.is_doctor %}
+                            Dr. {{ profile.user }}<small class="text-muted"> - {{ profile.user.doctor.specialization }} -</small>
+                        {% else %}
+                            {{ profile.user }}
+                        {% endif %}
+                    </a>
+                </p>
+                {% if profile.user.full_name %}
+                    <p>{{ profile.user.full_name }}</p>
+                {% endif %}
+                {% if profile.address %}
+                    <p>{{ profile.address }}</p>
+                {% endif %}
+                <p>Followers: {{ profile.followers.all.count }}</p>
+            </div>
+        </div>
+{% endfor %}
+
+{% for post in post_list %}
+        <article class="media content-section">
+            <img class='rounded-circle article-img' src="{{ post.author.profile.profile_pic.url }}">
+            <div class="media-body">
+                <div class="article-metadata">
+                  <a class="mr-2" href="{% url 'user_profile' post.author.profile.pk %}">
+                    {% if post.author.is_doctor %}
+                        Dr. {{ post.author }}<small class="text-muted"> - {{ post.author.doctor.specialization }} -</small>
+                    {% else %}
+                        {{ post.author }}
+                    {% endif %}
+                  </a>
+                  <small class="text-muted">{{ post.date_posted|date:"Y/m/d" }}</small>
+                </div>
+                <h2><a class="article-title" href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+                <!-- <p class="article-content">{{ post.content }}</p> -->
+            </div>
+        </article>
+{% endfor %}
+{% endblock content %}

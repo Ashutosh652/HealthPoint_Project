@@ -6,7 +6,7 @@ from PIL import Image
 #....................CUSTOM USER MODEL...........................
 class AccountManager(BaseUserManager):
 
-	def create_superuser(self, email, user_name, full_name, date_of_birth, password, **other_fields):
+	def create_superuser(self, email, user_name, full_name, password, **other_fields):
 		other_fields.setdefault('is_staff', True)
 		other_fields.setdefault('is_superuser', True)
 		other_fields.setdefault('is_active', True)
@@ -14,9 +14,9 @@ class AccountManager(BaseUserManager):
 			raise ValueError('Superuser must be assigned to is_staff=True')
 		if other_fields.get('is_superuser') is not True:
 			raise ValueError('Superuser must be assigned to is_superuser=True')
-		return self.create_user(email, user_name, full_name, date_of_birth, password, **other_fields)
+		return self.create_user(email, user_name, full_name, password, **other_fields)
 
-	def create_user(self, email, user_name, full_name, date_of_birth ,password, **other_fields):
+	def create_user(self, email, user_name, full_name ,password, **other_fields):
 		if not email:
 			raise ValueError('Users must provide an email.')
 		if not user_name:
@@ -24,7 +24,7 @@ class AccountManager(BaseUserManager):
 		if not full_name:
 			raise ValueError('Users must provide a full name.')
 		email = self.normalize_email(email)
-		user = self.model(email=email, user_name=user_name, full_name=full_name, date_of_birth=date_of_birth, **other_fields)
+		user = self.model(email=email, user_name=user_name, full_name=full_name, **other_fields)
 		user.set_password(password)
 		user.save()
 
@@ -35,9 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	email = models.EmailField(max_length=200, unique=True)
 	user_name = models.CharField(max_length=20, unique=True)
 	full_name = models.CharField(max_length=100)
-	profile_pic = models.ImageField(default='default.jpg', upload_to='profile_pics')
-	date_of_birth = models.DateField()
-	date_joined = models.DateTimeField(default=timezone.now)
+	date_joined = models.DateTimeField(default=timezone.now, blank=True)
 	is_staff = models.BooleanField(default=False)
 	is_active = models.BooleanField(default=True)
 	is_doctor = models.BooleanField(default=False)
@@ -46,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	objects = AccountManager()
 
 	USERNAME_FIELD = 'email'
-	REQUIRED_FIELDS = ['user_name', 'full_name', 'date_of_birth']
+	REQUIRED_FIELDS = ['user_name', 'full_name']
 
 	def __str__(self):
 		return self.user_name
@@ -56,24 +54,36 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 	def has_module_perms(self, app_label):
 		return self.is_superuser
-
-	def save(self):
-		super().save()
-		img = Image.open(self.profile_pic.path)
-		if img.height>300 or img.width>300:
-			output_size = (300, 300)
-			img.thumbnail(output_size)
-			img.save(self.profile_pic.path)
 #....................CUSTOM USER MODEL...........................
 
 class Doctor(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+	user = models.OneToOneField(User, related_name='doctor' ,on_delete=models.CASCADE, primary_key=True)
 	college_attended = models.CharField(max_length=200)
 	college_address = models.CharField(max_length=200)
 	date_graduated = models.DateField(null=True, blank=True)
 	certificate_of_graduation = models.ImageField(upload_to='certificates')
 	current_affiliation = models.CharField(max_length=200)
 	specialization = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.user.user_name
+
+
+class UserProfile(models.Model):
+	user = models.OneToOneField(User, related_name='profile' ,on_delete=models.CASCADE, primary_key=True)
+	address = models.CharField(max_length=200, null=True, blank=True)
+	profile_pic = models.ImageField(default='default.jpg', upload_to='profile_pics', null=True, blank=True)
+	date_of_birth = models.DateField(null=True, blank=True)
+	followers = models.ManyToManyField(User, blank=True, related_name='followers')
+	followings = models.ManyToManyField(User, blank=True, related_name='followings')
+
+	def save(self, *args, **kwargs):
+		super().save(*args, **kwargs)
+		img = Image.open(self.profile_pic.path)
+		if img.height>300 or img.width>300:
+			output_size = (300, 300)
+			img.thumbnail(output_size)
+			img.save(self.profile_pic.path)
 
 	def __str__(self):
 		return self.user.user_name

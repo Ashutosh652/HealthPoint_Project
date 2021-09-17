@@ -1,0 +1,82 @@
+{% extends "healthpoint/base.html" %}
+{% block content %}
+    <!--.......................................Profile Info................................................-->
+    <div class="content-section">
+      <div class="media">
+        <img class="rounded-circle account-img" src="{{ user.profile.profile_pic.url }}">
+        <div class="media-body">
+          <h2 class="account-heading">
+            <strong>{{ user.user_name }}</strong></h2>
+          <strong>{% if user.is_doctor %}Dr. {{ user.full_name }}
+              {% else %}{{ user.full_name }}
+              {% endif %}
+            </strong>
+          <p class="text-secondary"><strong>{{ user.email }}</strong></p>
+          <p class="text-secondary">{% if user.profile.address %}<strong>{{ user.profile.address }} </strong>{% endif %}</p>
+          <p class="text-secondary">
+            {% if user.doctor.college_attended and user.doctor.college_address %}
+            <strong>College Graduated From: </strong>{{ user.doctor.college_attended }}, {{ user.doctor.college_address }}
+            {% endif %}
+          </p>
+
+          <!-- {% if user.doctor.certificate_of_graduation %}
+            <strong>Certificate: </strong>
+            <img class="account-img" src="{{ user.doctor.certificate_of_graduation.url }}">
+            {% endif %} -->
+            <p class="text-secondary">
+            {% if user.doctor.current_affiliation %}
+            <strong>Currently Working On: </strong>{{ user.doctor.current_affiliation }}
+            {% endif %}
+          </p>
+          <p class="text-secondary">
+            {% if user.doctor.specialization %}
+            <strong>Specialization: </strong>{{ user.doctor.specialization }}
+            {% endif %}
+          </p>
+
+          {% if request.user == user %}
+            <div class="border-top pt-3"><small class="text-muted"><a class="ml-2 btn" href="{% url 'user_updateprofile' user.profile.pk %}">Update Info</a></small></div>
+          {% endif %}
+        </div>
+        <!--.......................................Followers................................................-->
+        <div class="mb-3">
+          <p class="text-secondary">
+            <a href="{% url 'list-followers' profile.pk %}"><strong>Followers</strong> {{ number_of_followers }}</a><br>
+            <a href="{% url 'list-followings' profile.pk %}"><strong>Following</strong> {{ number_of_followings }}</a>
+          </p>
+          {% if user == request.user %}
+          {% else %}
+            {% if is_following %}
+            <form method="POST" action="{% url 'remove-follower' profile.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger" type="submit">Unfollow</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{% url 'add-follower' profile.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-success" type="submit">Follow</button>
+            </form>
+            {% endif %}
+          {% endif %}
+        </div>
+        <!--.......................................Followers End................................................-->
+      </div>
+    </div>
+     <!--.......................................Profile Info End................................................-->
+
+    <!--.......................................Posts................................................-->
+    {% for post in posts %}
+    <article class="media content-section">
+      <img class='rounded-circle article-img' src="{{ post.author.profile.profile_pic.url }}">
+      <div class="media-body">
+          <div class="article-metadata">
+            <a class="mr-2" href="#">{{ post.author }}</a>
+            <small class="text-muted">{{ post.date_posted|date:"Y/m/d" }}</small>
+          </div>
+          <h2><a class="article-title" href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+          <p class="article-content">{{ post.content }}</p>
+      </div>
+    </article>
+  {% endfor %}
+  <!--.......................................Posts End................................................-->
+{% endblock content %}

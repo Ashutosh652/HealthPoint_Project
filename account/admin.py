@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Doctor
+from .models import User, Doctor, UserProfile
 
 class UserAdminConfig(UserAdmin):
 	search_fields = ('user_name', 'email', 'full_name')
@@ -8,7 +8,7 @@ class UserAdminConfig(UserAdmin):
 	ordering = ('-date_joined',)
 	list_display = ('email', 'user_name', 'full_name', 'is_active', 'is_staff', 'is_doctor')
 	fieldsets = (
-		(None, {'fields': ('email', 'user_name', 'full_name', 'date_joined', 'profile_pic', 'date_of_birth',)}),
+		(None, {'fields': ('email', 'user_name', 'full_name', 'date_joined',)}),
 		('Permissions', {'fields': ('is_staff', 'is_active', 'is_doctor', 'is_superuser')}),
 		)
 	add_fieldsets = (
@@ -25,3 +25,4 @@ class DoctorAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdminConfig)
 admin.site.register(Doctor, DoctorAdmin)
+admin.site.register(UserProfile)

@@ -1,0 +1,23 @@
+{% extends "healthpoint/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<title>Healthpoint</title>
+	
+		<div class="row justify-content-center mt-3">
+        <div class="col-md-3 col-sm-12 border-bottom">
+            
+        </div>
+    </div>
+    <div class="mb-5">
+		<form method="POST">
+			{% csrf_token %}
+			<fieldset class="form-group">
+				<h5>Are you sure?</h5>
+				<p>You are about to delete this post. This cannot be undone.</p>
+			</fieldset>
+			<div class="form-group">
+				<button class="btn btn-danger" type="submit">Delete</button>
+			</div>
+		</form>
+	</div>
+{% endblock content %}
