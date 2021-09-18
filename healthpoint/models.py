@@ -40,3 +40,14 @@ class Comment(models.Model):
 
 	def __str__(self):
 		return 'Comment {} by {}'.format(self.content, self.author)
+
+
+class Notification(models.Model):
+	# 1=like, 2=comment, 3=follow
+	notification_type = models.IntegerField()
+	to_user = models.ForeignKey(User, related_name='notification_to', on_delete=models.CASCADE, null=True)
+	from_user = models.ForeignKey(User, related_name='notification_from', on_delete=models.CASCADE, null=True)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='+', blank=True, null=True)
+	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='+', blank=True, null=True)
+	date = models.DateTimeField(default=timezone.now)
+	user_has_seen = models.BooleanField(default=False)

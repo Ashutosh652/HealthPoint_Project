@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -33,6 +34,11 @@
 	          <a class="nav-item nav-link" href="{% url 'healthpoint-home' %}">Home</a>
 	          <a class="nav-item nav-link" href="{% url 'healthpoint-about' %}">About</a>
 	        </div>
+	        {% if user.is_authenticated %}
+	        <div class="nav-item nav-link">
+	        		{% show_notifications %}
+	        </div>
+	        {% endif %}
 	        <!--................................Search Bar.................................-->
 	        <form class="d-flex" method="GET" action="{% url 'search' %}">
         <div class="input-group">
@@ -47,11 +53,32 @@
 	        	{% if user.is_authenticated %}
 		        	<a class="nav-item nav-link" href="{% url 'user_profile' request.user.pk %}">{{ request.user }}</a>
 	        		<a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+	        		
 	        	{% else %}
 	        		<a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
 					<a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
 		        {% endif %}
 	        </div>
+
+
+
+
+	        <!-- {% if user.is_authenticated %}
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-dark" data-bs-toggle="dropdown" role="buton" aria-expanded="false"><i class="fas fa-user"></i></a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{% url 'user_profile' request.user.profile.pk %}">{{ request.user }}</a></li>
+          <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
+        </ul>
+      </div>
+      <div class="nav-item">
+        
+      {% endif %} -->
+
+
+
+
+
 	      </div>
 	    </div>
 	  </nav>
@@ -90,7 +117,10 @@
     <!-- ................................jQuery first, then Popper.js, then Bootstrap JS ................................-->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{% static 'js/healthpoint.js' %}"></script>
+
 
 </body>
 </html>

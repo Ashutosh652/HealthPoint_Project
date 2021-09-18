@@ -1,13 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views import View
+from django.views.generic import RedirectView
 from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from .models import Post, Comment
-from account.models import UserProfile
+from .models import Post, Comment, Notification
+from account.models import UserProfile, User
 from .forms import PostForm, CommentForm
 
 
@@ -83,6 +84,8 @@ class PostDetailView(View):
 			new_comment.save()
 		comments = Comment.objects.filter(post=post)
 
+		notification = Notification.objects.create(notification_type=2, from_user=request.user, to_user=post.author, post=post)
+
 		context = {
 			'post': post,
 			'form': form,
@@ -103,6 +106,8 @@ class CommentReplyView(LoginRequiredMixin, View):
 			new_comment.post = post
 			new_comment.parent = parent_comment
 			new_comment.save()
+
+		notification = Notification.objects.create(notification_type=2, from_user=request.user, to_user=parent_comment.author, comment=new_comment)
 
 		return redirect('post-detail', pk=post_pk)
 
@@ -158,29 +163,30 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 		return self.request.user == comment.author
 
 
-class AddLike(LoginRequiredMixin, View):
+class AddLike(LoginRequiredMixin, RedirectView):
 	def post(self, request, pk, *args, **kwargs):
 		post = Post.objects.get(pk=pk)
 
-		is_dislike = False
+		disliked = False
 		for dislike in post.dislikes.all():
 			if dislike == request.user:
-				is_dislike = True
+				disliked = True
 				break
 
-		if is_dislike:
+		if disliked:
 			post.dislikes.remove(request.user)
 
-		is_like = False
+		liked = False
 		for like in post.likes.all():
 			if like == request.user:
-				is_like = True
+				liked = True
 				break
 
-		if not is_like:
+		if not liked:
 			post.likes.add(request.user)
+			notification = Notification.objects.create(notification_type=1, from_user=request.user, to_user=post.author, post=post)
 
-		if is_like:
+		if liked:
 			post.likes.remove(request.user)
 
 		next = request.POST.get('next', '/')
@@ -191,25 +197,25 @@ class AddDislike(LoginRequiredMixin, View):
 	def post(self, request, pk, *args, **kwargs):
 		post = Post.objects.get(pk=pk)
 
-		is_like = False
+		liked = False
 		for like in post.likes.all():
 			if like == request.user:
-				is_like = True
+				liked = True
 				break
 
-		if is_like:
+		if liked:
 			post.likes.remove(request.user)
 
-		is_dislike = False
+		disliked = False
 		for dislike in post.dislikes.all():
 			if dislike == request.user:
-				is_dislike = True
+				disliked = True
 				break
 
-		if not is_dislike:
+		if not disliked:
 			post.dislikes.add(request.user)
 
-		if is_dislike:
+		if disliked:
 			post.dislikes.remove(request.user)
 
 		next = request.POST.get('next', '/')
@@ -220,27 +226,28 @@ class AddCommentLike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         comment = Comment.objects.get(pk=pk)
 
-        is_dislike = False
+        disliked = False
 
         for dislike in comment.dislikes.all():
             if dislike == request.user:
-                is_dislike = True
+                disliked = True
                 break
 
-        if is_dislike:
+        if disliked:
             comment.dislikes.remove(request.user)
 
-        is_like = False
+        liked = False
 
         for like in comment.likes.all():
             if like == request.user:
-                is_like = True
+                liked = True
                 break
 
-        if not is_like:
+        if not liked:
             comment.likes.add(request.user)
+            notification = Notification.objects.create(notification_type=1, from_user=request.user, to_user=comment.author, comment=comment)
 
-        if is_like:
+        if liked:
             comment.likes.remove(request.user)
 
         next = request.POST.get('next', '/')
@@ -251,27 +258,27 @@ class AddCommentDislike(LoginRequiredMixin, View):
     def post(self, request, pk, *args, **kwargs):
         comment = Comment.objects.get(pk=pk)
 
-        is_like = False
+        liked = False
 
         for like in comment.likes.all():
             if like == request.user:
-                is_like = True
+                liked = True
                 break
 
-        if is_like:
+        if liked:
             comment.likes.remove(request.user)
 
-        is_dislike = False
+        disliked = False
 
         for dislike in comment.dislikes.all():
             if dislike == request.user:
-                is_dislike = True
+                disliked = True
                 break
 
-        if not is_dislike:
+        if not disliked:
             comment.dislikes.add(request.user)
 
-        if is_dislike:
+        if disliked:
             comment.dislikes.remove(request.user)
 
         next = request.POST.get('next', '/')
@@ -296,3 +303,29 @@ class UserSearchView(View):
 			}
 
 		return render(request, 'healthpoint/search.html', context)
+
+
+class PostNotification(View):
+	def get(self, request, notification_pk, post_pk, *args, **kwargs):
+		notification = Notification.objects.get(pk=notification_pk)
+		post = Post.objects.get(pk=post_pk)
+		notification.user_has_seen = True
+		notification.save()
+		return redirect('post-detail', pk=post_pk)
+
+
+class FollowNotification(View):
+	def get(self, request, notification_pk, profile_pk, *args, **kwargs):
+		notification = Notification.objects.get(pk=notification_pk)
+		profile = UserProfile.objects.get(pk=profile_pk)
+		notification.user_has_seen = True
+		notification.save()
+		return redirect('user_profile', pk=profile_pk)
+
+
+class RemoveNotification(View):
+	def delete(self, request, notification_pk, *args, **kwargs):
+		notification = Notification.objects.get(pk=notification_pk)
+		notification.user_has_seen = True
+		notification.save()
+		return HttpResponse('Success', content_type="text/plain")

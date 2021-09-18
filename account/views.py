@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm
 from django.views.generic import CreateView
 from .models import User, Doctor, UserProfile
-from healthpoint.models import Post
+from healthpoint.models import Post, Notification
 
 # def register(request):
 # 	if request.method == 'POST':
@@ -166,6 +166,9 @@ class AddFollower(LoginRequiredMixin, View):
 		profile.followers.add(request.user)
 		request.user.profile.followings.add(profile.user)
 		messages.success(self.request, f'Followed {profile.user.user_name} successfully.')
+
+		notification = Notification.objects.create(notification_type=3, from_user=request.user, to_user=profile.user)
+
 		return redirect('user_profile', pk=profile.pk)
 
 

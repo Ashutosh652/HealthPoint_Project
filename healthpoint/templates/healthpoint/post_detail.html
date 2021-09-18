@@ -1,6 +1,8 @@
 {% extends "healthpoint/base.html" %}
 {% load crispy_forms_tags %}
 {% load static %}
+
+
 {% block content %}
 	<title>Healthpoint</title>
 		<article class="media content-section">
@@ -37,7 +39,7 @@
 			    		</button>
 			    		{% else %}
 						<button class="remove-default-btn" type="submit">
-			    			<i class="far fa-thumbs-up"><span>{{ post.likes.all.count }}</span></i>
+			    			<i class="fas fa-thumbs-up"><span>{{ post.likes.all.count }}</span></i>
 			    		</button>
 			    		{% endif %}
 			    	</form>
@@ -92,12 +94,12 @@
 	</div>
 
 
-<!--...................................CommentLikeDislikeReply...........................................-->
+<!--...................................Comment Like Dislike Reply...........................................-->
     
     <div class="border-bottom">
     	<div class="d-flex flex-row">
 
-    	<!--...................................CommentLikeandDislikeButtons...........................................-->
+    	<!--...................................Comment Like and Dislike Buttons...........................................-->
         
 			    	<form method="POST" action="{% url 'comment-like' post.pk comment.pk %}">
 			    		{% csrf_token %}
@@ -132,7 +134,7 @@
     		<button class="remove-default-btn"><i class="far fa-comment-dots" onclick="commentReplyToggle('{{ comment.pk }}')"></i></button>
 
     	</div>
-<!--...................................CommentLikeDislikeReplyEnd...........................................-->
+<!--...................................Comment Like Dislike Reply End...........................................-->
     
 
     </div>
@@ -171,7 +173,7 @@
         </div>
 	</div>
 		</div>
-		<!--...................................CommentLikeandDislikeButtons...........................................-->
+		<!--...................................Comment Like and Dislike Buttons...........................................-->
         
 			    	<form method="POST" action="{% url 'comment-like' post.pk child_comment.pk %}">
 			    		{% csrf_token %}
@@ -217,5 +219,4 @@
 		</article>
 
 
-<script type="text/javascript" src="{% static 'js/healthpoint.js' %}"></script>
-{% endblock content %}
+ {% endblock content %}

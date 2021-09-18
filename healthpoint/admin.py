@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Comment
+from .models import Post, Comment, Notification
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('author', 'post', 'date_commented')
@@ -13,3 +13,4 @@ class PostAdmin(admin.ModelAdmin):
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(Notification)

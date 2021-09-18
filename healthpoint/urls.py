@@ -16,4 +16,7 @@ urlpatterns = [
     path('post/<int:post_pk>/comment/<int:pk>/dislike/', views.AddCommentDislike.as_view(), name='comment-dislike'),
     path('post/<int:post_pk>/comment/<int:pk>/reply/', views.CommentReplyView.as_view(), name='comment-reply'),
     path('search/', views.UserSearchView.as_view(), name='search'),
+    path('notification/<int:notification_pk>/post/<int:post_pk>/', views.PostNotification.as_view(), name="post-notification"),
+    path('notification/<int:notification_pk>/profile/<int:profile_pk>/', views.FollowNotification.as_view(), name="follow-notification"),
+    path('notification/delete/<int:notification_pk>/', views.RemoveNotification.as_view(), name="notification-delete"),
 ]
