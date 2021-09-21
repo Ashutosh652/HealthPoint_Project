@@ -2,4 +2,7 @@
 __pycache__/*
 */__pycache__/*
 *.pyc
+BASE_DIR/media/certificates/**
+BASE_DIR/media/post_photos/**
+BASE_DIR/media/profile_pics/**
 #db.sqlite3
