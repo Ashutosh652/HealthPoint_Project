@@ -59,8 +59,15 @@
             {% endif %}
           {% endif %}
         </div>
+
+
         <!--.......................................Followers End................................................-->
       </div>
+      <div class="mb-3">
+          {% if user.is_doctor %}
+            <a class="btn btn-outline-info" href="#">Request Appointment</a>
+          {% endif %}
+        </div>
     </div>
      <!--.......................................Profile Info End................................................-->
 
@@ -75,6 +82,9 @@
           </div>
           <h2><a class="article-title" href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
           <p class="article-content">{{ post.content }}</p>
+          {% if post.image %}
+            <img src="{{ post.image.url }}"  style="max-width: 100%; max-height: auto; border-radius: 10px; margin-bottom: 10px;"/>
+          {% endif %}
       </div>
     </article>
   {% endfor %}

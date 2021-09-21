@@ -1,10 +1,13 @@
 from django.db import models
 from django.utils import timezone
 from account.models import User
+from PIL import Image
+
 
 class Post(models.Model):
 	title = models.CharField(max_length=100)
 	content = models.TextField()
+	image = models.ImageField(upload_to='post_photos', blank=True, null=True)
 	date_posted = models.DateTimeField(default=timezone.now)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	likes = models.ManyToManyField(User, blank=True, related_name='likes')

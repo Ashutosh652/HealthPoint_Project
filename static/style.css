@@ -12,6 +12,13 @@
   color: #ff0000;
 }
 
+.post-image {
+  max-width: 50%;
+  max-height: auto;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
 .child-comment{
   margin-left: 2rem;
 }
