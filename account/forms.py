@@ -3,6 +3,7 @@ from .models import User, Doctor, Appointment
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.db import transaction
 from bootstrap_datepicker_plus import DatePickerInput
+from phonenumber_field.formfields import PhoneNumberField
 
 
 class UserRegisterForm(UserCreationForm):
@@ -37,7 +38,7 @@ class DoctorRegisterForm(UserCreationForm):
 		user.is_active = False
 		user.email = self.cleaned_data.get('email')
 		user.full_name = self.cleaned_data.get('full_name')
-		user.date_of_birth = self.cleaned_data.get('date_of_birth')
+		user.profile.date_of_birth = self.cleaned_data.get('date_of_birth')
 		user.save()
 		doctor = Doctor.objects.create(user=user)
 		doctor.college_attended = self.cleaned_data.get('college_attended')
@@ -46,6 +47,7 @@ class DoctorRegisterForm(UserCreationForm):
 		doctor.certificate_of_graduation = self.cleaned_data.get('certificate_of_graduation')
 		doctor.current_affiliation = self.cleaned_data.get('current_affiliation')
 		doctor.specialization = self.cleaned_data.get('specialization')
+		doctor.work_phone = self.cleaned_data.get('work_phone')
 		doctor.save()
 		return user
 
@@ -63,26 +65,29 @@ class UserProfileUpdateForm(forms.ModelForm):
 	address = forms.CharField(label='Address', max_length = 300, required = False)
 	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
 	profile_pic = forms.ImageField(required=False)
+	phone = PhoneNumberField(label="Phone number", required=False)
 
 	class Meta:
 		model = User
-		fields = ['date_of_birth', 'profile_pic', 'address']
+		fields = ['date_of_birth', 'profile_pic', 'address', 'phone']
 
 
 class DoctorUpdateForm(forms.ModelForm):
-	address = forms.CharField(label='Address', max_length = 300, required = False)
-	date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
-	profile_pic = forms.ImageField(required=False)
+	# address = forms.CharField(label='Address', max_length = 300, required = False)
+	# date_of_birth = forms.DateField(label='Date of Birth', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=False)
+	# profile_pic = forms.ImageField(required=False)
+	# phone = PhoneNumberField(label="Phone number", required=False)
 	college_attended = forms.CharField(label='College Attended' ,max_length = 200, required=False)
 	college_address = forms.CharField(label='College Location' ,max_length = 200, required=False)
 	date_graduated = forms.DateField(label='Date Graduated', required=False)
 	certificate_of_graduation = forms.ImageField(label='Certificate of Graduation', required=False)
 	current_affiliation = forms.CharField(label='Current Workplace' ,max_length = 200, required=False)
 	specialization = forms.CharField(label='Specialization' ,max_length = 100, required=False)
+	work_phone = PhoneNumberField(label="Work Phone", required=False)
 
 	class Meta:
 		model = Doctor
-		fields = ['address','date_of_birth', 'profile_pic', 'college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation', 'current_affiliation', 'specialization']
+		fields = ['college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation', 'current_affiliation', 'specialization', 'work_phone']
 
 
 class AppointmentForm(forms.ModelForm):
@@ -96,15 +101,9 @@ class AppointmentForm(forms.ModelForm):
 		fields = ['date', 'detail']
 
 
-# class AcceptAppointmentForm(forms.ModelForm):
-# 	is_accepted = forms.BooleanField(label='Accept')
+class ThreadForm(forms.Form):
+	user_name = forms.CharField(label='', max_length=100)
 
-# 	class Meta:
-# 		model = Appointment
-# 		fields = ['is_accepted']
 
-# 	@transaction.atomic
-# 	def data_save(self):
-# 		appointment = self.save(commit=False)
-# 		appointment.is_accepted = True
-# 		appointment.save()
+class MessageForm(forms.Form):
+    message = forms.CharField(label='', max_length=1000)

@@ -22,6 +22,12 @@
                 {% if appointment.detail %}
                     <p><b>Detail: </b>{{ appointment.detail }}</p>
                 {% endif %}
+                {% if appointment.to_doctor.work_phone %}
+                    <p><b>Phone: </b>{{ appointment.to_doctor.work_phone }}</p>
+                {% endif %}
+                {% if appointment.to_doctor.user.email %}
+                    <p><b>Email: </b>{{ appointment.to_doctor.user.email }}</p>
+                {% endif %}
                  <!-- <a class="btn btn-outline-danger" href="{% url 'appointment-delete' user.pk appointment.pk %}">Cancel Appointment</a> -->
             </div>
         </div>

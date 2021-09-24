@@ -12,7 +12,7 @@ urlpatterns = [
     path('login/', views.loginpage, name='login'),
     path('logout/', views.logoutpage, name='logout'),
     path('user_updateprofile/<int:pk>/', views.user_updateprofile, name='user_updateprofile'),
-    path('doctor_updateprofile/', views.doctor_updateprofile, name='doctor_updateprofile'),
+    path('doctor_updateprofile/<int:pk>/', views.doctor_updateprofile, name='doctor_updateprofile'),
     path('user_profile/<int:pk>/followers/add/', views.AddFollower.as_view(), name='add-follower'),
     path('user_profile/<int:pk>/followers/remove/', views.RemoveFollower.as_view(), name='remove-follower'),
     path('user_profile/<int:pk>/followers/', views.ListFollowers.as_view(), name='list-followers'),
@@ -27,4 +27,8 @@ urlpatterns = [
     path('user_profile/<int:pk>/accepted_by_me/appointments/', views.AcceptedAppointmentsByMe.as_view(), name='accepted-appointments-by-me'),
     path('user_profile/<int:pk>/rejected_by_me/appointments/', views.RejectedAppointmentsByMe.as_view(), name='rejected-appointments-by-me'),
     path('user_profile/<int:user_pk>/appointment-delete/<int:pk>/', views.AppointmentDeleteView.as_view(), name='appointment-delete'),
+    path('inbox/', views.ListThreads.as_view(), name='inbox'),
+    path('inbox/create-thread/', views.CreateThread.as_view(), name='create-thread'),
+    path('inbox/<int:pk>/', views.ThreadView.as_view(), name='thread'),
+    path('inbox/<int:pk>/create-message/', views.CreateMessage.as_view(), name='create-message'),
 ]
