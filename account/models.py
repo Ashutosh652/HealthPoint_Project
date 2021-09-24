@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from PIL import Image
+from phonenumber_field.modelfields import PhoneNumberField
 
 #....................CUSTOM USER MODEL...........................
 class AccountManager(BaseUserManager):
@@ -64,6 +65,7 @@ class Doctor(models.Model):
 	certificate_of_graduation = models.ImageField(upload_to='certificates')
 	current_affiliation = models.CharField(max_length=200)
 	specialization = models.CharField(max_length=100)
+	work_phone = PhoneNumberField(blank=True, null=True, unique=True)
 
 	def __str__(self):
 		return self.user.user_name
@@ -74,6 +76,7 @@ class UserProfile(models.Model):
 	address = models.CharField(max_length=200, null=True, blank=True)
 	profile_pic = models.ImageField(default='default.jpg', upload_to='profile_pics', null=True, blank=True)
 	date_of_birth = models.DateField(null=True, blank=True)
+	phone = PhoneNumberField(blank=True, null=True, unique=True)
 	followers = models.ManyToManyField(User, blank=True, related_name='followers')
 	followings = models.ManyToManyField(User, blank=True, related_name='followings')
 
@@ -87,3 +90,13 @@ class UserProfile(models.Model):
 
 	def __str__(self):
 		return self.user.user_name
+
+
+class Appointment(models.Model):
+	by_user = models.ForeignKey(User, related_name='appointment_by', on_delete=models.CASCADE)
+	to_doctor = models.ForeignKey(Doctor, related_name='appointment_to', on_delete=models.CASCADE)
+	#preferred date for appointment by by_user
+	date = models.DateField()
+	detail = models.TextField(null=False, blank=False)
+	is_accepted = models.BooleanField(default=False)
+	is_rejected = models.BooleanField(default=False)

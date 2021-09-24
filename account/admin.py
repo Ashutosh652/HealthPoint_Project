@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Doctor, UserProfile
+from .models import User, Doctor, UserProfile, Appointment
 
 class UserAdminConfig(UserAdmin):
 	search_fields = ('user_name', 'email', 'full_name')
@@ -26,3 +26,4 @@ class DoctorAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdminConfig)
 admin.site.register(Doctor, DoctorAdmin)
 admin.site.register(UserProfile)
+admin.site.register(Appointment)

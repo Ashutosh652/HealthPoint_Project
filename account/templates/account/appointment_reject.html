@@ -1,0 +1,24 @@
+{% extends "healthpoint/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<title>Healthpoint</title>
+	
+		<div class="row justify-content-center mt-3">
+        <div class="col-md-3 col-sm-12 border-bottom">
+            
+        </div>
+    </div>
+    <div class="mb-5">
+		<form method="POST">
+			{% csrf_token %}
+			<fieldset class="form-group">
+				<h5>Are you sure?</h5>
+				<p>Reject this appointment?</p>
+				{{ form|crispy }}
+			</fieldset>
+			<div class="form-group">
+				<button class="btn btn-outline-danger" type="submit">Reject</button>
+			</div>
+		</form>
+	</div>
+{% endblock content %}

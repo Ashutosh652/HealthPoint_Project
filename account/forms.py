@@ -1,7 +1,8 @@
 from django import forms
-from .models import User, Doctor
+from .models import User, Doctor, Appointment
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.db import transaction
+from bootstrap_datepicker_plus import DatePickerInput
 
 
 class UserRegisterForm(UserCreationForm):
@@ -82,3 +83,28 @@ class DoctorUpdateForm(forms.ModelForm):
 	class Meta:
 		model = Doctor
 		fields = ['address','date_of_birth', 'profile_pic', 'college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation', 'current_affiliation', 'specialization']
+
+
+class AppointmentForm(forms.ModelForm):
+	date = forms.DateField(label='Date', widget=forms.widgets.DateInput(attrs={'type': 'date'}), required=True)
+	detail = forms.CharField(label='', widget=forms.Textarea(attrs={'style':'max-width : 40em', 'rows':3, 'placeholder':'Short Description for the Reason of Requesting Appointment.'}), required=True)
+	# is_accepted = forms.BooleanField(label='', required=False)
+	# is_rejected = forms.BooleanField(label='', required=False)
+
+	class Meta:
+		model = Appointment
+		fields = ['date', 'detail']
+
+
+# class AcceptAppointmentForm(forms.ModelForm):
+# 	is_accepted = forms.BooleanField(label='Accept')
+
+# 	class Meta:
+# 		model = Appointment
+# 		fields = ['is_accepted']
+
+# 	@transaction.atomic
+# 	def data_save(self):
+# 		appointment = self.save(commit=False)
+# 		appointment.is_accepted = True
+# 		appointment.save()

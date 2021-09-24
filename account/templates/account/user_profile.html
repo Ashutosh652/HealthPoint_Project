@@ -65,9 +65,16 @@
       </div>
       <div class="mb-3">
           {% if user.is_doctor %}
-            <a class="btn btn-outline-info" href="#">Request Appointment</a>
+            {% if user == request.user %}
+              <a class="btn btn-outline-info" href="{% url 'appointments-requested-to-me' user.pk %}">Appoinments Requested to me.</a>
+            {% else %}
+              <a class="btn btn-outline-info" href="{% url 'appointment' user.pk %}">Request Appointment</a>
+            {% endif %}
           {% endif %}
-        </div>
+          {% if user == request.user %}
+            <a class="btn btn-outline-info" href="{% url 'my-requested-appointments' user.pk %}">My Requesed Appointments</a>
+          {% endif %}
+      </div>
     </div>
      <!--.......................................Profile Info End................................................-->
 

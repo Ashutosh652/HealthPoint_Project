@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm
+from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm, AppointmentForm
 from django.views.generic import CreateView
-from .models import User, Doctor, UserProfile
+from django.views.generic.edit import DeleteView, UpdateView
+# from django.views.generic.edit import FormView
+from .models import User, Doctor, UserProfile, Appointment
 from healthpoint.models import Post, Notification
 
 # def register(request):
@@ -211,3 +214,164 @@ class ListFollowings(View):
 		}
 
 		return render(request, 'account/followings_list.html', context)
+
+
+class BookAppointment(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		doctor = Doctor.objects.get(pk=pk)
+		form = AppointmentForm()
+
+		context = {
+			'doctor' : doctor,
+			'form' : form,
+			}
+
+		return render(request, 'account/appointment.html', context)
+
+	def post(self, request, pk, *args, **kwargs):
+		doctor = Doctor.objects.get(pk=pk)
+		form = AppointmentForm(request.POST)
+		if form.is_valid():
+			new_appointment = form.save(commit=False)
+			new_appointment.by_user = request.user
+			new_appointment.to_doctor = doctor
+			new_appointment.is_accepted = False
+			new_appointment.is_rejected = False
+			new_appointment.save()
+			messages.success(request, f'Appointment request sent successfully to {{ doctor.user_name }}!')
+		else:
+			messages.error(request, f'Error: Could not request appointment')
+		context = {
+			'doctor' : doctor,
+			'form' : form,
+			}
+		return redirect('user_profile', pk=doctor.pk)
+
+
+class MyRequestedAppointments(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		user = request.user
+		appointments = Appointment.objects.filter(by_user=user)
+		context = {
+		'user' : user,
+		'appointments' : appointments,
+		}
+		return render(request, 'account/my_requested_appointments.html', context)
+
+	# def test_func(self):
+	# 	pk = self.kwargs['pk']
+	# 	profile = UserProfile.objects.get(pk=pk)
+	# 	return self.request.user.profile == profile
+			
+
+
+class AppointmentsRequestedToMe(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		user = request.user.doctor
+		appointments = Appointment.objects.filter(to_doctor=user)
+		context = {
+		'appointments' : appointments,
+		}
+		return render(request, 'account/appointments_requested_to_me.html', context)
+
+	# def test_func(self):
+	# 	pk = self.kwargs['pk']
+	# 	appointment = Appointment.objects.get(pk=pk)
+	# 	profile = appointment.to_doctor.user.profile
+	# 	return self.request.user.profile == profile
+
+
+class AppointmentDeleteView(LoginRequiredMixin, DeleteView):
+	model = Appointment
+	template_name = 'account/appointment_delete.html'
+	# success_url = reverse_lazy('user_profile', kwargs={'pk':pk})
+
+	def get_success_url(self):
+		pk = self.request.user.pk
+		return reverse_lazy('user_profile', kwargs={'pk':pk})
+
+	# def test_func(self):
+	# 	appointment = self.get_object()
+	# 	return self.request.user == appointment.by_user or appointment.to_doctor
+
+
+class AcceptAppointment(LoginRequiredMixin, UpdateView):
+	model = Appointment
+	fields = []
+	template_name = 'account/appointment_accept.html'
+
+	def get_success_url(self):
+		appointment = self.get_object()
+		appointment.is_accepted = True
+		appointment.save()
+		pk = self.kwargs['pk']
+		return reverse_lazy('appointments-requested-to-me', kwargs={'pk':pk})
+
+	# def test_func(self):
+	# 	pk = self.kwargs['pk']
+	# 	appointment = Appointment.objects.get(pk=pk)
+	# 	profile = appointment.to_doctor.user.profile
+	# 	return self.request.user.profile == profile
+
+
+class RejectAppointment(LoginRequiredMixin, UpdateView):
+	model = Appointment
+	fields = []
+	template_name = 'account/appointment_reject.html'
+
+	def get_success_url(self):
+		appointment = self.get_object()
+		appointment.is_rejected = True
+		appointment.save()
+		pk = self.kwargs['pk']
+		return reverse_lazy('appointments-requested-to-me', kwargs={'pk':pk})
+
+
+class AcceptedAppointments(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		user = request.user
+		appointments = Appointment.objects.filter(by_user=user, is_accepted=True)
+		context = {
+		'appointments' : appointments,
+		}
+		return render(request, 'account/accepted_appointments.html', context)
+
+	# def test_func(self):
+	# 	pk = self.kwargs['pk']
+	# 	profile = UserProfile.objects.get(pk=pk)
+	# 	return self.request.user.profile == profile
+
+
+class RejectedAppointments(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		user = request.user
+		appointments = Appointment.objects.filter(by_user=user, is_rejected=True)
+		context = {
+		'appointments' : appointments,
+		}
+		return render(request, 'account/rejected_appointments.html', context)
+
+
+class AcceptedAppointmentsByMe(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		doctor = request.user.doctor
+		appointments = Appointment.objects.filter(to_doctor=doctor, is_accepted=True)
+		context = {
+		'appointments' : appointments,
+		}
+		return render(request, 'account/accepted_appointments_by_me.html', context)
+
+	# def test_func(self):
+	# 	pk = self.kwargs['pk']
+	# 	profile = UserProfile.objects.get(pk=pk)
+	# 	return self.request.user.profile == profile
+
+
+class RejectedAppointmentsByMe(LoginRequiredMixin, View):
+	def get(self, request, pk, *args, **kwargs):
+		doctor = request.user.doctor
+		appointments = Appointment.objects.filter(to_doctor=doctor, is_rejected=True)
+		context = {
+		'appointments' : appointments,
+		}
+		return render(request, 'account/rejected_appointments_by_me.html', context)

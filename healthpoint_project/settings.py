@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'healthpoint.apps.HealthpointConfig',
     'account.apps.AccountConfig',
     'crispy_forms',
+    'phonenumber_field',
+    'bootstrap_datepicker_plus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

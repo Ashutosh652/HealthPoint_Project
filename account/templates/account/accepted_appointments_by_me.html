@@ -1,0 +1,30 @@
+{% extends "healthpoint/base.html" %}
+
+{% block content %}
+        <div class="row justify-content-left">
+                <a class="btn btn-outline-info mr-1" href="{% url 'appointments-requested-to-me' user.pk %}">Pending Appointments</a>
+                <a class="btn btn-outline-info" href="{% url 'rejected-appointments-by-me' user.pk %}">Rejected Appointments</a>
+        </div>
+        <div class="row justify-content-center mt-3"><h4>Accepted Appointments</h4></div>
+
+{% for appointment in appointments %}
+{% if appointment.is_accepted %}
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-5 col-sm-12 border-bottom position-relative">
+            <img class='rounded-circle article-img' src="{{ appointment.by_user.profile.profile_pic.url }}">
+                <p><a class="mr-2" href="{% url 'user_profile' appointment.by_user.profile.pk %}">{{ appointment.by_user }}</a></p>
+                {% if appointment.by_user.full_name %}
+                    <p>{{ appointment.by_user.full_name }}</p>
+                {% endif %}
+                {% if appointment.date %}
+                    <p><b>Preferred Date: </b>{{ appointment.date }}</p>
+                {% endif %}
+                {% if appointment.detail %}
+                    <p><b>Detail: </b>{{ appointment.detail }}</p>
+                {% endif %}
+                 <!-- <a class="btn btn-outline-danger" href="{% url 'appointment-delete' user.pk appointment.pk %}">Cancel Appointment</a> -->
+            </div>
+        </div>
+{% endif %}
+{% endfor %}
+{% endblock %}
