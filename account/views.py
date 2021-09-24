@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
+from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm, AppointmentForm
+from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm, AppointmentForm, ThreadForm, MessageForm
 from django.views.generic import CreateView
 from django.views.generic.edit import DeleteView, UpdateView
 # from django.views.generic.edit import FormView
-from .models import User, Doctor, UserProfile, Appointment
+from .models import User, Doctor, UserProfile, Appointment, ThreadModel, MessageModel
 from healthpoint.models import Post, Notification
 
 # def register(request):
@@ -114,19 +115,22 @@ def user_updateprofile(request, pk):
 	return render(request, 'account/user_updateprofile.html', context)
 
 @login_required
-def doctor_updateprofile(request):
+def doctor_updateprofile(request, pk):
 	if request.method == 'POST':
-		u_form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
-		d_form = DoctorUpdateForm(request.POST, request.FILES, instance=request.user)
-		if form.is_valid():
+		u_form = UserUpdateForm(request.POST, instance=request.user)
+		up_form = UserProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+		d_form = DoctorUpdateForm(request.POST, request.FILES, instance=request.user.doctor)
+		if u_form.is_valid() and up_form.is_valid() and d_form.is_valid():
 			u_form.save()
+			up_form.save()
 			d_form.save()
 			messages.success(request, f'Your account has been updated!')
 			return redirect('user_profile', pk=pk)
 	else:
 		u_form = UserUpdateForm(instance=request.user)
+		up_form = UserProfileUpdateForm(instance=request.user.profile)
 		d_form = DoctorUpdateForm(instance=request.user.doctor)
-	context = {'pk':pk, 'u_form':u_form, 'd_form':d_form}
+	context = {'pk':pk, 'u_form':u_form, 'up_form':up_form, 'd_form':d_form}
 	return render(request, 'account/doctor_updateprofile.html', context)
 
 
@@ -230,22 +234,27 @@ class BookAppointment(LoginRequiredMixin, View):
 
 	def post(self, request, pk, *args, **kwargs):
 		doctor = Doctor.objects.get(pk=pk)
-		form = AppointmentForm(request.POST)
-		if form.is_valid():
-			new_appointment = form.save(commit=False)
-			new_appointment.by_user = request.user
-			new_appointment.to_doctor = doctor
-			new_appointment.is_accepted = False
-			new_appointment.is_rejected = False
-			new_appointment.save()
-			messages.success(request, f'Appointment request sent successfully to {{ doctor.user_name }}!')
+		if request.user.profile.phone:
+			form = AppointmentForm(request.POST)
+			if form.is_valid():
+				new_appointment = form.save(commit=False)
+				new_appointment.by_user = request.user
+				new_appointment.to_doctor = doctor
+				new_appointment.is_accepted = False
+				new_appointment.is_rejected = False
+				new_appointment.save()
+				messages.success(request, f'Appointment request sent successfully to {{ doctor.user_name }}!')
+			else:
+				messages.error(request, f'Error: Could not request appointment')
+			context = {
+				'doctor' : doctor,
+				'form' : form,
+				}
+			return redirect('user_profile', pk=doctor.pk)
+
 		else:
-			messages.error(request, f'Error: Could not request appointment')
-		context = {
-			'doctor' : doctor,
-			'form' : form,
-			}
-		return redirect('user_profile', pk=doctor.pk)
+			messages.error(request, f'You cannot request an appointment without a phone number. Please go to your profile and update your information to add phone number.')
+			return redirect('user_profile', pk=doctor.pk)
 
 
 class MyRequestedAppointments(LoginRequiredMixin, View):
@@ -301,11 +310,16 @@ class AcceptAppointment(LoginRequiredMixin, UpdateView):
 	template_name = 'account/appointment_accept.html'
 
 	def get_success_url(self):
-		appointment = self.get_object()
-		appointment.is_accepted = True
-		appointment.save()
-		pk = self.kwargs['pk']
-		return reverse_lazy('appointments-requested-to-me', kwargs={'pk':pk})
+		if self.request.user.doctor.work_phone:
+			appointment = self.get_object()
+			appointment.is_accepted = True
+			appointment.save()
+			pk = self.kwargs['pk']
+			return reverse_lazy('appointments-requested-to-me', kwargs={'pk':pk})
+		else:
+			messages.warning(self.request, f'You cannot accept any appointment without a work phone number. Please go to your profile and update it to include work phone number.')
+			pk = self.kwargs['pk']
+			return reverse_lazy('appointments-requested-to-me', kwargs={'pk':pk})
 
 	# def test_func(self):
 	# 	pk = self.kwargs['pk']
@@ -375,3 +389,75 @@ class RejectedAppointmentsByMe(LoginRequiredMixin, View):
 		'appointments' : appointments,
 		}
 		return render(request, 'account/rejected_appointments_by_me.html', context)
+
+
+class ListThreads(View):
+	def get(self, request, *args, **kwargs):
+		threads = ThreadModel.objects.filter(Q(user=request.user) | Q(receiver=request.user))
+		context = {
+		'threads' : threads,
+		}
+		return render(request, 'account/inbox.html', context)
+
+
+class CreateThread(View):
+	def get(self, request, *args, **kwargs):
+		form = ThreadForm()
+		context = {
+		'form' : form
+		}
+		return render(request, 'account/create_thread.html', context)
+
+	def post(self, request, *args, **kwargs):
+		form = ThreadForm(request.POST)
+		user_name = request.POST.get('user_name')
+		try:
+			receiver = User.objects.get(user_name=user_name)
+			if ThreadModel.objects.filter(user=request.user, receiver=receiver).exists():
+				thread = ThreadModel.objects.filter(user=request.user, receiver=receiver)[0]
+				return redirect('thread', pk=thread.pk)
+			elif ThreadModel.objects.filter(user=receiver, receiver=request.user).exists():
+				thread = ThreadModel.objects.filter(user=receiver, receiver=request.user)[0]
+				return redirect('thread', pk=thread.pk)
+			if form.is_valid():
+				thread = ThreadModel(
+					user=request.user,
+					receiver=receiver
+					)
+				thread.save()
+				return redirect('thread', pk=thread.pk)
+		except:
+			return redirect('create-thread')
+
+
+class ThreadView(View):
+	def get(self, request, pk, *args, **kwargs):
+		form = MessageForm()
+		thread = ThreadModel.objects.get(pk=pk)
+		message_list = MessageModel.objects.filter(thread__pk__contains=pk)
+		context = {
+            'thread': thread,
+            'form': form,
+            'message_list': message_list
+		}
+
+		return render(request, 'account/thread.html', context)
+
+
+class CreateMessage(View):
+    def post(self, request, pk, *args, **kwargs):
+        thread = ThreadModel.objects.get(pk=pk)
+        if thread.receiver == request.user:
+            receiver = thread.user
+        else:
+            receiver = thread.receiver
+
+        message = MessageModel(
+            thread=thread,
+            sender_user=request.user,
+            receiver_user=receiver,
+            body=request.POST.get('message')
+        )
+
+        message.save()
+        return redirect('thread', pk=pk)

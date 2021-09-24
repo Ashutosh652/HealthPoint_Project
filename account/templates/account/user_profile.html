@@ -35,7 +35,15 @@
           </p>
 
           {% if request.user == user %}
-            <div class="border-top pt-3"><small class="text-muted"><a class="ml-2 btn" href="{% url 'user_updateprofile' user.profile.pk %}">Update Info</a></small></div>
+            <div class="border-top pt-3">
+              <small class="text-muted">
+                {% if request.user.is_doctor %}
+                  <a class="ml-2 btn" href="{% url 'doctor_updateprofile' user.profile.pk %}">Update Info</a>
+                {% else %}
+                  <a class="ml-2 btn" href="{% url 'user_updateprofile' user.profile.pk %}">Update Info</a>
+                {% endif %}
+              </small>
+            </div>
           {% endif %}
         </div>
         <!--.......................................Followers................................................-->
@@ -76,9 +84,9 @@
           {% endif %}
       </div>
     </div>
-     <!--.......................................Profile Info End................................................-->
+     <!--...................................ProfileInfoEnd.........................................-->
 
-    <!--.......................................Posts................................................-->
+    <!--.......................................Posts...............................................-->
     {% for post in posts %}
     <article class="media content-section">
       <img class='rounded-circle article-img' src="{{ post.author.profile.profile_pic.url }}">

@@ -32,7 +32,9 @@
 	      <div class="collapse navbar-collapse" id="navbarToggle">
 	        <div class="navbar-nav mr-auto">
 	          <a class="nav-item nav-link" href="{% url 'healthpoint-home' %}">Home</a>
-	          <a class="nav-item nav-link" href="{% url 'healthpoint-about' %}">About</a>
+	          <div class="nav-item" style="margin-right: 15px;">
+		          <a class="ml-1000" style="color: #333; transition: 0.5s;" href="{% url 'inbox' %}"><i class="far fa-paper-plane"></i></a>
+		        </div>
 	        </div>
 	        {% if user.is_authenticated %}
 	        <div class="nav-item nav-link">

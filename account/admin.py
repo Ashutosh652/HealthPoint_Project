@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Doctor, UserProfile, Appointment
+from .models import User, Doctor, UserProfile, Appointment, ThreadModel, MessageModel
 
 class UserAdminConfig(UserAdmin):
 	search_fields = ('user_name', 'email', 'full_name')
@@ -27,3 +27,5 @@ admin.site.register(User, UserAdminConfig)
 admin.site.register(Doctor, DoctorAdmin)
 admin.site.register(UserProfile)
 admin.site.register(Appointment)
+admin.site.register(ThreadModel)
+admin.site.register(MessageModel)
