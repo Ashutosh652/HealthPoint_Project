@@ -427,6 +427,7 @@ class CreateThread(View):
 				thread.save()
 				return redirect('thread', pk=thread.pk)
 		except:
+			messages.error(request, 'Invalid username.')
 			return redirect('create-thread')
 
 
@@ -445,19 +446,25 @@ class ThreadView(View):
 
 
 class CreateMessage(View):
-    def post(self, request, pk, *args, **kwargs):
-        thread = ThreadModel.objects.get(pk=pk)
-        if thread.receiver == request.user:
-            receiver = thread.user
-        else:
-            receiver = thread.receiver
+	def post(self, request, pk, *args, **kwargs):
+		form = MessageForm(request.POST, request.FILES)
+		thread = ThreadModel.objects.get(pk=pk)
+		if thread.receiver == request.user:
+			receiver = thread.user
+		else:
+			receiver = thread.receiver
 
-        message = MessageModel(
-            thread=thread,
-            sender_user=request.user,
-            receiver_user=receiver,
-            body=request.POST.get('message')
-        )
+		if form.is_valid():
+			message = form.save(commit=False)
+			message.thread = thread
+			message.sender_user = request.user
+			message.receiver_user = receiver
+			message.save()
 
-        message.save()
-        return redirect('thread', pk=pk)
+		notification = Notification.objects.create(
+		notification_type=4,
+		from_user=request.user,
+		to_user=receiver,
+		thread=thread
+		)
+		return redirect('thread', pk=pk)

@@ -24,13 +24,23 @@
 
 	{% for message in message_list %}
 	<div class="row">
+		{% if message.sender_user == request.user %}
 		<div class="col-md-12 my-1">
-			{% if message.sender_user == request.user %}
-				<div class="my-3" style="background-color: #f3f3f3; border-radius: 30px; padding: 10px 25px; width: 25%;">
-					<p>{{ message.body }}</p>
-				</div>
+			
+			{% if message.image %}
+			<div><img src="{{ message.image.url }}" style="border-radius: 10px; max-width: 35%; height: auto;" ></div>
+			{% endif %}
+			<div class="my-3" style="background-color: #f3f3f3; border-radius: 30px; padding: 10px 25px; width: 35%;">
+				<p>{{ message.body }}</p>
+			</div>
+		</div>
+
 			{% elif message.receiver_user == request.user %}
-				<div class="my-3" style="background-color: rgb(1, 196, 255); color: #fff; border-radius: 30px; padding: 10px 25px; width: 25%; float: right;">
+			<div class="col-md-12 offset-6">
+				{% if message.image %}
+				<div class="ms-auto" style="margin-left: auto; margin-right: 0;"><img src="{{ message.image.url }}" style="border-radius: 10px; max-width: 35%; height: auto;"></div>
+				{% endif %}
+				<div class="my-3 ms-auto" style="background-color: rgb(1, 196, 255); color: #fff; border-radius: 30px; padding: 10px 25px; width: 35%;">
 					<p>{{ message.body }}</p>
 				</div>
 			{% endif %}

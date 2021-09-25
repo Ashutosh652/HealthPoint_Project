@@ -8,7 +8,7 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from .models import Post, Comment, Notification
-from account.models import UserProfile, User
+from account.models import UserProfile, User, ThreadModel
 from .forms import PostForm, CommentForm
 
 
@@ -324,6 +324,17 @@ class FollowNotification(View):
 		notification.user_has_seen = True
 		notification.save()
 		return redirect('user_profile', pk=profile_pk)
+
+
+class ThreadNotification(View):
+    def get(self, request, notification_pk, object_pk, *args, **kwargs):
+        notification = Notification.objects.get(pk=notification_pk)
+        thread = ThreadModel.objects.get(pk=object_pk)
+
+        notification.user_has_seen = True
+        notification.save()
+
+        return redirect('thread', pk=object_pk)
 
 
 class RemoveNotification(View):

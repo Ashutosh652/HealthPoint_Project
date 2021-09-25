@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from account.models import User
+from account.models import User, ThreadModel
 from PIL import Image
 
 
@@ -46,11 +46,12 @@ class Comment(models.Model):
 
 
 class Notification(models.Model):
-	# 1=like, 2=comment, 3=follow
+	# 1=like, 2=comment, 3=follow, 4-dm
 	notification_type = models.IntegerField()
 	to_user = models.ForeignKey(User, related_name='notification_to', on_delete=models.CASCADE, null=True)
 	from_user = models.ForeignKey(User, related_name='notification_from', on_delete=models.CASCADE, null=True)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='+', blank=True, null=True)
 	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='+', blank=True, null=True)
+	thread = models.ForeignKey(ThreadModel, on_delete=models.CASCADE, related_name='+', blank=True, null=True)
 	date = models.DateTimeField(default=timezone.now)
 	user_has_seen = models.BooleanField(default=False)
