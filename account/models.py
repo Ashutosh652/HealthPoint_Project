@@ -34,6 +34,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 	id = models.AutoField(primary_key = True)
 	email = models.EmailField(max_length=200, unique=True)
+	is_email_verified = models.BooleanField(default=False)
 	user_name = models.CharField(max_length=20, unique=True)
 	full_name = models.CharField(max_length=100)
 	date_joined = models.DateTimeField(default=timezone.now, blank=True)
