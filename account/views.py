@@ -6,12 +6,19 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str, force_text, DjangoUnicodeDecodeError
+from django.core.mail import EmailMessage
 from .forms import UserRegisterForm, DoctorRegisterForm, UserUpdateForm, DoctorUpdateForm, UserProfileUpdateForm, AppointmentForm, ThreadForm, MessageForm
 from django.views.generic import CreateView
 from django.views.generic.edit import DeleteView, UpdateView
 # from django.views.generic.edit import FormView
 from .models import User, Doctor, UserProfile, Appointment, ThreadModel, MessageModel
 from healthpoint.models import Post, Notification
+from .utils import generate_token
+from django.conf import settings
 
 # def register(request):
 # 	if request.method == 'POST':
@@ -24,6 +31,19 @@ from healthpoint.models import Post, Notification
 # 	else:
 # 		form = UserRegisterForm()
 # 	return render(request, 'account/register.html', {'form': form})
+
+def send_action_email(user, request):
+	current_site = get_current_site(request)
+	email_subject = 'Activate your Healthpoint account!'
+	email_body = render_to_string('account/activate.html', {
+		'user' : user,
+		'domain' : current_site,
+		'uid' : urlsafe_base64_encode(force_bytes(user.pk)),
+		'token' : generate_token.make_token(user),
+		})
+	email = EmailMessage(subject=email_subject, body=email_body, from_email=settings.EMAIL_FROM_USER, to=[user.email])
+	email.send()
+
 
 def register(request):
 	if request.user.is_authenticated:
@@ -40,7 +60,10 @@ def loginpage(request):
 			email = request.POST.get('email')
 			password = request.POST.get('password')
 			user = authenticate(request, username=email, password=password)
-			if user is not None and user.is_active:
+			if not user.is_email_verified:
+				messages.error(request, 'Your email is not verified. Please check your mail.')
+				return redirect('login')
+			elif user is not None and user.is_active:
 				login(request ,user)
 				messages.success(request, f'Logged In Successfully.')
 				return redirect('healthpoint-home')
@@ -68,7 +91,9 @@ class UserRegister(CreateView):
 			if form.is_valid():
 				form.save()
 				user_name = form.cleaned_data.get('user_name')
-				messages.success(self.request, f'Account created for {user_name}! You can login now!')
+				user = User.objects.get(user_name=user_name)
+				send_action_email(user, self.request)
+				messages.success(self.request, f'We sent an you an email to verify your account.')
 				return redirect('login')
 		else:
 			form = UserRegisterForm()
@@ -86,8 +111,10 @@ class DoctorRegister(CreateView):
 				# form.save()
 				form.data_save()
 				user_name = form.cleaned_data.get('user_name')
-				messages.success(self.request, f'Account created for {user_name}! You cannot login until your credentials are verified. This may take upto 24 hours. You will be notified via email after your account is activated.')
-				return redirect('healthpoint-home')
+				user = User.objects.get(user_name=user_name)
+				send_action_email(user, self.request)
+				messages.success(self.request, f'We sent an you an email to verify your account. You cannot login until your credentials are verified. This may take upto 24 hours. You will be notified via email after your account is activated.')
+				return redirect('login')
 		else:
 			form = DoctorRegisterForm()
 		return render(self.request, 'account/doctor_register.html', {'form': form})
@@ -96,6 +123,20 @@ class DoctorRegister(CreateView):
 # @login_required
 # def userprofile(request):
 # 	return render(request, 'account/user_profile.html')
+
+
+def activate_user(self, uidb64, token):
+	# try:
+	uid = force_text(urlsafe_base64_decode(uidb64))
+	user = User.objects.get(pk=uid)
+	# except Exception as e:
+		# user = None
+	# if user and generate_token.check_token(user, token):
+	user.is_email_verified = True
+	user.save()
+	# messages.success(self.request, 'Email Verified!')
+	return redirect('login')
+	# return render(self.request, 'account/activate_failed.html', {'user':user})
 
 
 @login_required

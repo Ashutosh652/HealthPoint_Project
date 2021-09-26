@@ -8,6 +8,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('user_register/', views.UserRegister.as_view(), name='user_register'),
     path('doctor_register/', views.DoctorRegister.as_view(), name='doctor_register'),
+    path('activate_user/<uidb64>/<token>/', views.activate_user, name='activate'),
     path('user_profile/<int:pk>/', login_required(views.UserProfileView.as_view()), name='user_profile'),
     path('login/', views.loginpage, name='login'),
     path('logout/', views.logoutpage, name='logout'),
