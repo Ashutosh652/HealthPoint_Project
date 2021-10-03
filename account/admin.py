@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Doctor, UserProfile, Appointment, ThreadModel, MessageModel
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 class UserAdminConfig(UserAdmin):
 	search_fields = ('user_name', 'email', 'full_name')
@@ -21,6 +25,16 @@ class UserAdminConfig(UserAdmin):
 class DoctorAdmin(admin.ModelAdmin):
 	search_fields = ('user__user_name', 'specialization' ,'college_attended', 'current_affiliation')
 	list_display = ('user', 'specialization' ,'college_attended', 'current_affiliation')
+	actions = ['send_verify_email']
+
+	def send_verify_email(self, request, queryset):
+		current_site = get_current_site(request)
+		email_subject = 'Your Healthpoint account has been activated!'
+		email_body = render_to_string('account/activate_doctor.html')
+		doctors = queryset.all()
+		for doctor in doctors:
+			email = EmailMessage(subject=email_subject, body=email_body, from_email=settings.EMAIL_FROM_USER, to=[doctor.user.email])
+			email.send()
 
 
 admin.site.register(User, UserAdminConfig)

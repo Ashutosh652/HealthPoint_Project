@@ -2,7 +2,6 @@ from django import forms
 from .models import User, Doctor, Appointment, MessageModel
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.db import transaction
-from bootstrap_datepicker_plus import DatePickerInput
 from phonenumber_field.formfields import PhoneNumberField
 
 
@@ -26,10 +25,11 @@ class DoctorRegisterForm(UserCreationForm):
 	certificate_of_graduation = forms.ImageField(label='Certificate of Graduation')
 	current_affiliation = forms.CharField(label='Current Affiliation (eg. Hospital, Clinic, etc.)' ,max_length=200)
 	specialization = forms.CharField(label='Specialization' ,max_length=100)
+	work_phone = PhoneNumberField(label="Work Phone")
 
 	class Meta(UserCreationForm.Meta):
 		model = User
-		fields = ['full_name', 'user_name', 'email', 'date_of_birth' ,'password1', 'password2', 'college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation' ,'current_affiliation', 'specialization']
+		fields = ['full_name', 'user_name', 'email', 'date_of_birth' ,'password1', 'password2', 'college_attended', 'college_address', 'date_graduated', 'certificate_of_graduation' ,'current_affiliation', 'specialization', 'work_phone']
 
 	@transaction.atomic
 	def data_save(self):
@@ -38,8 +38,9 @@ class DoctorRegisterForm(UserCreationForm):
 		user.is_active = False
 		user.email = self.cleaned_data.get('email')
 		user.full_name = self.cleaned_data.get('full_name')
-		user.profile.date_of_birth = self.cleaned_data.get('date_of_birth')
 		user.save()
+		user.profile.date_of_birth = self.cleaned_data.get('date_of_birth')
+		user.profile.save()
 		doctor = Doctor.objects.create(user=user)
 		doctor.college_attended = self.cleaned_data.get('college_attended')
 		doctor.college_address = self.cleaned_data.get('college_address')

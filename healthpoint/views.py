@@ -34,9 +34,10 @@ class home(View):
 		posts = Post.objects.filter(
 			author__profile__followers__in = [logged_in_user.id]
 			)
+		rest_posts = Post.objects.exclude(author__profile__followers__in = [logged_in_user.id])
 		form = PostForm()
-
 		context = {
+		'rest_posts':rest_posts,
 		'posts':posts,
 		'form': form
 		}
@@ -78,6 +79,8 @@ class PostDetailView(View):
 		return render(request, 'healthpoint/post_detail.html', context)
 
 	def post(self, request, pk, *args, **kwargs):
+		if not request.user.is_authenticated:
+			return redirect('login')
 		post = Post.objects.get(pk=pk)
 		form = CommentForm(request.POST)
 		if form.is_valid():

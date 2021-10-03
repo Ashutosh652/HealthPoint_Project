@@ -50,4 +50,31 @@
 		  </div>
 		</article>
 	{% endfor %}
+
+
+	{% for post in rest_posts %}
+		<article class="media content-section">
+			<img class='rounded-circle article-img' src="{{ post.author.profile.profile_pic.url }}">
+			<div class="media-body">
+			    <div class="article-metadata">
+			      <a class="mr-2" href="{% url 'user_profile' post.author.profile.pk %}">
+			      	{% if post.author.is_doctor %}
+			      		Dr. {{ post.author }}<small class="text-muted"> - {{ post.author.doctor.specialization }} -</small>
+			      	{% else %}
+			      		{{ post.author }}
+			      	{% endif %}
+			  	</a>
+			      <small class="text-muted">{{ post.date_posted|date:"Y/m/d" }}</small>
+			    </div>
+			    <h2><a class="article-title" href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h2>
+			    <p class="article-content">{{ post.content }}</p>
+			    {% if post.image %}
+			    	<img src="{{ post.image.url }}" style="max-width: 100%; max-height: auto; border-radius: 10px; margin-bottom: 10px;"/>
+			    {% endif %}
+
+			    
+
+		  </div>
+		</article>
+	{% endfor %}
 {% endblock content %}

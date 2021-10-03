@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views import View
@@ -63,7 +64,7 @@ def loginpage(request):
 			if not user.is_email_verified:
 				messages.error(request, 'Your email is not verified. Please check your mail.')
 				return redirect('login')
-			elif user is not None and user.is_active:
+			if user is not None and user.is_active:
 				login(request ,user)
 				messages.success(request, f'Logged In Successfully.')
 				return redirect('healthpoint-home')
@@ -92,9 +93,14 @@ class UserRegister(CreateView):
 				form.save()
 				user_name = form.cleaned_data.get('user_name')
 				user = User.objects.get(user_name=user_name)
+				# try:
 				send_action_email(user, self.request)
 				messages.success(self.request, f'We sent an you an email to verify your account.')
 				return redirect('login')
+				# except:
+				# 	user.delete()
+				# 	messages.error(self.request, f'The email you have entered does not exist. Please enter correct email address.')
+				# 	return redirect('user_register')
 		else:
 			form = UserRegisterForm()
 		return render(self.request, 'account/user_register.html', {'form': form})
@@ -112,9 +118,14 @@ class DoctorRegister(CreateView):
 				form.data_save()
 				user_name = form.cleaned_data.get('user_name')
 				user = User.objects.get(user_name=user_name)
-				send_action_email(user, self.request)
-				messages.success(self.request, f'We sent an you an email to verify your account. You cannot login until your credentials are verified. This may take upto 24 hours. You will be notified via email after your account is activated.')
-				return redirect('login')
+				try:
+					send_action_email(user, self.request)
+					messages.success(self.request, f'We sent an you an email to verify your account. You cannot login until your credentials as a doctor are verified. This may take upto 24 hours. Please try to login tomorrow.')
+					return redirect('login')
+				except:
+					user.delete()
+					messages.error(self.request, f'The email you have entered does not exist. Please enter correct email address.')
+					return redirect('doctor_register')
 		else:
 			form = DoctorRegisterForm()
 		return render(self.request, 'account/doctor_register.html', {'form': form})
