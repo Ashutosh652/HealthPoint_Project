@@ -4,6 +4,7 @@ This is a web app created using django for the purpose of learning django. Note 
 
 To run this on your computer:
   If you don't have any of the following packages installed, install them first. You can check which packages are installed by typing 'pip list' on your command line.
+    
     1. Django
     2. django-crispy-forms
     3. django-phonenumber-field
@@ -17,6 +18,7 @@ To run this on your computer:
    You can just type 'pip install -package name-' in your command line to install the packages.
    
    Then, you should be able to run it by following the following steps:
+   
    1. Rename the '.env.example' file to '.env'.
    2. Open your command line and make sure that you are in the same directory as the manage.py file.
    3. Type 'python manage.py shell' and hit Enter. You should see three greater than (>>>) signs.
