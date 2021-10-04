@@ -3,7 +3,7 @@
 This is a web app created using django for the purpose of learning django. Note that this webapp is synchronous i.e. django channels is not used.
 
 To run this on your computer:
-  If you don't have any of the following packages installed, install them first. You can check which packages are installed by typing 'pip list' on your command line.
+  If you don't have any of the following packages installed, install them first. You can check which packages are installed by typing ... pip list ... on your command line.
     
     1. Django
     2. django-crispy-forms
