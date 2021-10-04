@@ -17,7 +17,7 @@ To run this on your computer:
    
    You can just type 'pip install -package name-' in your command line to install the packages.
    
-   Then, you should be able to run it by following the following steps:
+   Then, you should be able to run it by following the following steps after cloning the repo:
    
    1. Rename the '.env.example' file to '.env'.
    2. Open your command line and make sure that you are in the same directory as the manage.py file.
