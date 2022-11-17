@@ -37,7 +37,7 @@ To run this on your computer:
    16. Type 'python manage.py migrate' and hit Enter.
    17. Type 'python manage.py createsuperuser' and hit Enter. It will prompt you to enter your name, email, username and password. You don't have to enter an existing email and password.
    18. Type 'python manage.py runserver' and hit Enter.
-   19. Type in 'localhost:8000' in your browser and hot Enter. You should now see the website.
+   19. Type in 'localhost:8000' in your browser and hit Enter. You should now see the website.
    20. Go to 'localhost:8000/admin' url. Type in the email and password you used to create the superuser in step 4 and log in.
    21. You should now see the admin panel. Click on 'Users' in the left sidebar. There should be only one user i.e. the superuser. Click on it.
    22. Scroll to the bottom and you should see some checkboxes. Make sure that 'is_active' and 'is_email_verified' both are checked and click on 'Save'.
